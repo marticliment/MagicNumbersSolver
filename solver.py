@@ -1,7 +1,8 @@
 import random, time
 
-NUM_OF_DIGITS = 4 
+NUM_OF_DIGITS = 10 
 # Minimum 4, maximum depends on your CPU
+REPS = 500
 
 class PLAY:
     N1: int = 0
@@ -24,7 +25,6 @@ class PLAY:
     def count(self, n: int) -> int:
         return int(n == self.N1) + int(n == self.N2) + int(n == self.N3) + int(n == self.N4)
     
-
 
 bannedNumbers: list[list[int]] = [[], [], [], []]
 bannedCombis: list[PLAY] = []
@@ -142,10 +142,8 @@ def solve():
         current_guess = getBestGuess(combis)
 
       
-print("BEGIN")
 total = 0
 
-REPS = 1000
 STARTTIME = time.time()
 
 for i in range(REPS):
