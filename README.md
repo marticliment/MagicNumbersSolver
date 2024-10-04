@@ -10,6 +10,6 @@ This python script tries to guess that number in the least amount possible of at
 
 1. Download the .py file
 2. Adjust the `NUM_OF_DIGITS` variable. This changes the possible digits an input can take. Default is 10
-3. Adjust the `REPS` to change how many tests will be run. 500 reps should finish in a reasonable amount of time (<30secs)
+3. Adjust the `REPS` to change how many tests will be run. 500 reps should finish in a reasonable amount of time (<30secs for python, <5 secs for pypy)
 3. Adjust the `PRINT_EACH_RESULT` to enable/disable reporting each solved game
 4. Run the script (with pypy preferably) and watch your CPU melt itself.
