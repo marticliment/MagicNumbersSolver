@@ -1,8 +1,8 @@
 import random, time
 
-NUM_OF_DIGITS = 10 
-# Minimum 4, maximum depends on your CPU
-REPS = 500
+NUM_OF_DIGITS = 10 # Minimum 4, maximum depends on your CPU
+REPS = 500 # Around 500 with pypy, around 200 with regular python
+PRINT_EACH_RESULT = False
 
 class PLAY:
     N1: int = 0
@@ -120,7 +120,6 @@ def getBestGuess(combis) -> str:
 
 def solve():
     global bannedCombis, bannedNumbers
-    # ["6","7","8","9"], ["6","7","8","9"], ["6","7","8","9"], ["6","7","8","9"]
     bannedNumbers = [[], [], [], []]
     bannedCombis = []
     NUM_TO_GUESS = getRandomNumber()
@@ -134,7 +133,8 @@ def solve():
         (jaque, mate) = compareNumbers(current_guess, NUM_TO_GUESS)
         
         if mate == 4:
-            print("Solution:", combis[0], f"(original was {NUM_TO_GUESS})", f"(done in {rounds} steps)")
+            if PRINT_EACH_RESULT: 
+                print("Solution:", combis[0], f"(original was {NUM_TO_GUESS})", f"(done in {rounds} steps)")
             return rounds
                 
         bannedCombis.append(current_guess)
@@ -151,4 +151,4 @@ for i in range(REPS):
 
 ENDTIME = time.time()
 
-print(f"AVG of {REPS} rounds: {total/REPS} ({(ENDTIME - STARTTIME)*100/100} seconds)")
+print(f"AVG of {REPS} rounds: {total/REPS} attempts per game (took {int((ENDTIME - STARTTIME)*100)/100} seconds)")
