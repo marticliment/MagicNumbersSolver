@@ -1,7 +1,7 @@
 import random, time
 
 NUM_OF_DIGITS = 10 # Minimum 4, maximum depends on your CPU
-REPS = 500 # Around 500 with pypy, around 200 with regular python
+REPS = 200 # Around 500 with pypy, around 200 with regular python
 PRINT_EACH_RESULT = False
 
 class PLAY:
@@ -17,7 +17,7 @@ class PLAY:
         self.N4 = random.randint(0, NUM_OF_DIGITS-1)
          
     def __str__(self) -> str:
-        return f"{self.N1},{self.N2},{self.N3},{self.N4}"
+        return f"({self.N1},{self.N2},{self.N3},{self.N4})"
     
     def contains(self, n: int) -> bool:
         return self.count(n) > 0
@@ -25,11 +25,12 @@ class PLAY:
     def count(self, n: int) -> int:
         return int(n == self.N1) + int(n == self.N2) + int(n == self.N3) + int(n == self.N4)
     
+    def compactString(self) -> str:
+        return f"{self.N1}{self.N2}{self.N3}{self.N4}"
+    
 
 bannedNumbers: list[list[int]] = [[], [], [], []]
-bannedCombis: list[PLAY] = []
-
-
+playedCombis: list[PLAY] = []
 
 def getRandomNumber() -> str:
     num: PLAY = PLAY()
@@ -76,27 +77,15 @@ def getEqualOrBetterCombinations(combis: list[PLAY], current: PLAY, jaques, mate
         bannedNumbers[2].append(current.N3)
         bannedNumbers[3].append(current.N4)
     
-    new_combis_4 = []
-    new_combis_3 = []
-    new_combis_2 = []
     new_combis_1 = []
     for entry in combis:
         if entry.N1 in bannedNumbers[0] or entry.N2 in bannedNumbers[1] or entry.N3 in bannedNumbers[2] or entry.N4 in bannedNumbers[3]: continue
-        if entry in bannedCombis: continue
+        if entry in playedCombis: continue
         
         if getCoincidingNumbers(entry, current) == (jaques + mates) and getCoincidingNumbersWithPositions(entry, current) == mates: 
             new_combis_1.append(entry)
-        if getCoincidingNumbers(entry, current) >= (jaques + mates) and getCoincidingNumbersWithPositions(entry, current) == mates: 
-            new_combis_2.append(entry)
-        if getCoincidingNumbers(entry, current) == (jaques + mates) and getCoincidingNumbersWithPositions(entry, current) >= mates: 
-            new_combis_3.append(entry)
-        if getCoincidingNumbers(entry, current) >= (jaques + mates) and getCoincidingNumbersWithPositions(entry, current) >= mates: 
-            new_combis_4.append(entry)
         
-    if(len(new_combis_1) > 0): return new_combis_1    
-    if(len(new_combis_2) > 0): return new_combis_2    
-    if(len(new_combis_3) > 0): return new_combis_3
-    return new_combis_4   
+    return new_combis_1    
     
     
 
@@ -114,14 +103,14 @@ def compareNumbers(MY_GUESS: PLAY, NUM_TO_GUESS: PLAY) -> tuple[int, int]:
     return (jaque - mate, mate)
 
 
-def getBestGuess(combis) -> str:
+def getBestGuess(combis: list[PLAY]) -> PLAY:
     return combis[random.randint(0, len(combis)-1)]
 
 
 def solve():
-    global bannedCombis, bannedNumbers
+    global playedCombis, bannedNumbers
     bannedNumbers = [[], [], [], []]
-    bannedCombis = []
+    playedCombis = []
     NUM_TO_GUESS = getRandomNumber()
 
     rounds: int = 0
@@ -137,7 +126,7 @@ def solve():
                 print("Solution:", combis[0], f"(original was {NUM_TO_GUESS})", f"(done in {rounds} steps)")
             return rounds
                 
-        bannedCombis.append(current_guess)
+        playedCombis.append(current_guess)
         combis = getEqualOrBetterCombinations(combis, current_guess, jaque, mate)
         current_guess = getBestGuess(combis)
 
