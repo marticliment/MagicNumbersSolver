@@ -1,7 +1,7 @@
 import random, time
 
 NUM_OF_DIGITS = 10   
-REPS = 1000             # Around 500 with pypy, around 200 with regular python
+REPS = 100000             # Around 500 with pypy, around 200 with regular python
 PRINT_EACH_RESULT = False
 
 class Guess:
@@ -89,22 +89,18 @@ def GetPossibleCombinations() -> list[Guess]:
                     nums.append(num)
     return nums
 
-def RemoveFromCombinations(OldCombis: list[Guess], GameHistory: list[Result]) -> list[Guess]:
+def RemoveFromCombinations(OldCombis: list[Guess], LastResult: Result) -> list[Guess]:
     NewCombis: list[Guess] = []
     for num in OldCombis:
-        isCompatible: bool = True
-        for round in GameHistory:
-            if not round.IsCompatible(num): 
-                isCompatible = False
-                break
+        if LastResult.IsCompatible(num): 
+            NewCombis.append(num)
             
-        if(isCompatible): NewCombis.append(num)
         
     return NewCombis
         
 def GetNextGuess(PossibleGuesses: list[Guess], GameHistory: list[Result]) -> Guess:
-    if(len(GameHistory) == 0): return Guess.FromInt(1, 2, 3, 4)
-    if(len(GameHistory) == 1): return Guess.FromInt(8, 5, 6, 7)
+    # if(len(GameHistory) == 0): return Guess.FromInt(1, 2, 3, 4)
+    # if(len(GameHistory) == 1): return Guess.FromInt(8, 5, 6, 7)
     return PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)]
 
 def PlayRound(MY_GUESS: Guess, NUM_TO_GUESS: Guess) -> Result:
@@ -137,13 +133,13 @@ def solve():
                 print(" Solution:", CurrentGuess, f"(original was {NUM_TO_GUESS})", f"(done in {len(GameHistory)} steps)")
             return len(GameHistory)
               
-        PossibleGuesses = RemoveFromCombinations(PossibleGuesses, GameHistory)
+        PossibleGuesses = RemoveFromCombinations(PossibleGuesses, result)
         CurrentGuess = GetNextGuess(PossibleGuesses, GameHistory)
 
 
 def to_time_str(seconds):
     mins, sec = divmod(seconds, 60)
-    return f"{int(mins):02}:{sec:05.2f}"
+    return f"{int(mins):02}:{sec:02.0f}"
 
 def progressbar(it, prefix="", size=60):
     count = len(it)
@@ -154,8 +150,8 @@ def progressbar(it, prefix="", size=60):
         remaining = (elapsed / j) * (count - j) if j > 0 else 0
         time_str = to_time_str(remaining)
         
-        if j > 0: bar = f"\r{prefix}[{'#'*x}{('_'*(size-x))}] {j}/{count} ETA: {time_str}"
-        else: bar = f"\r{prefix}[{'#'*x}{('_'*(size-x))}] {j}/{count} ETA: N/A"
+        if j > 0: bar = f"\r{prefix}[{'#'*x}{('_'*(size-x))}] {j/count*100:5.1f}% ETA: {time_str}"
+        else: bar = f"\r{prefix}[{'#'*x}{('_'*(size-x))}] {j/count*100}% ETA: N/A"
         print(bar, end="", flush=True)
         
     show(0)
@@ -172,7 +168,7 @@ STARTTIME = time.time()
 
 print(f"Rounds: {REPS}")
 
-divider = max(int(REPS / 100), 1)
+divider = max(int(REPS / 1000), 1)
 
 for i in progressbar(range(REPS // divider)):
     for j in range(divider):
