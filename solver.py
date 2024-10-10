@@ -1,7 +1,7 @@
 import random, time
 
 NUM_OF_DIGITS = 10   
-REPS = 100000             # Around 500 with pypy, around 200 with regular python
+REPS = 500             # Around 500 with pypy, around 200 with regular python
 PRINT_EACH_RESULT = False
 
 class Guess:
@@ -76,8 +76,6 @@ class Result:
                int(self.Guess.N3 == other.N3) + \
                int(self.Guess.N4 == other.N4)
 
-
-
 def GetPossibleCombinations() -> list[Guess]:    
     nums: list[Guess] = []
     for x in range(0, NUM_OF_DIGITS):
@@ -95,12 +93,12 @@ def RemoveFromCombinations(OldCombis: list[Guess], LastResult: Result) -> list[G
         if LastResult.IsCompatible(num): 
             NewCombis.append(num)
             
-        
     return NewCombis
         
 def GetNextGuess(PossibleGuesses: list[Guess], GameHistory: list[Result]) -> Guess:
-    # if(len(GameHistory) == 0): return Guess.FromInt(1, 2, 3, 4)
-    # if(len(GameHistory) == 1): return Guess.FromInt(8, 5, 6, 7)
+    # if len(GameHistory) == 0: return Guess.FromInt(1, 2, 3, 4)
+    # else if len(GameHistory) == 1: return Guess.FromInt(8, 5, 6, 7)
+    # return PossibleGuesses[0]
     return PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)]
 
 def PlayRound(MY_GUESS: Guess, NUM_TO_GUESS: Guess) -> Result:
@@ -109,11 +107,6 @@ def PlayRound(MY_GUESS: Guess, NUM_TO_GUESS: Guess) -> Result:
     res.CorrectNums = res.GetCorrectNums(NUM_TO_GUESS)
     res.TotalCoincidences = res.GetTotalCoincidences(NUM_TO_GUESS)
     return res
-
-
-def getBestGuess(combis: list[Guess]) -> Guess:
-    return combis[random.randint(0, len(combis)-1)]
-
 
 def solve():    
     NUM_TO_GUESS = Guess.FromRandomGen()
