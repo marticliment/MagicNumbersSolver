@@ -1,58 +1,56 @@
 import random, time
+from itertools import permutations
 
 RANGE_OF_VALUES_PER_DIGIT = 10
-REPS = 500             # Around 500 with pypy, around 200 with regular python
+LENGTH_OF_NUMBERS = 4
+REPS = 10000             # Around 500 with pypy, around 200 with regular python
 PRINT_EACH_RESULT = False
 
+RANGE_OF_INDEXES = list(range(LENGTH_OF_NUMBERS))
+
 class Guess:
-    N1: int = 0
-    N2: int = 0
-    N3: int = 0
-    N4: int = 0
+    Numbers: list[int] = []
     
     def __init__(self):
-        pass
+        self.Numbers = [0] * LENGTH_OF_NUMBERS
     
-    def FromString(string: str):
+    def FromIterable(string: str | list[int] | tuple[int]):
         self = Guess()
-        self.N1 = int(string[0])
-        self.N2 = int(string[1])
-        self.N3 = int(string[2])
-        self.N4 = int(string[3])
+        for i in RANGE_OF_INDEXES: self.Numbers[i] = int(string[i])
         return self
-        
-    def FromInt(x: int, y: int, z: int, w: int):
-        self = Guess()
-        self.N1 = x
-        self.N2 = y
-        self.N3 = z
-        self.N4 = w
-        return self
-    
+            
     def FromRandomGen():
         self = Guess()
-        self.N1 = self.N2 = self.N3 = self.N4 = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
+        if LENGTH_OF_NUMBERS > RANGE_OF_VALUES_PER_DIGIT: 
+            raise Exception("LENGTH_OF_NUMBERS must be smaller or equal than RANGE_OF_VALUES_PER_DIGIT")
         
-        while self.N1 == self.N2:
-            self.N2 = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
-        while self.N1 == self.N3 or self.N2 == self.N3: 
-            self.N3 = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
-        while self.N1 == self.N4 or self.N2 == self.N4 or self.N3 == self.N4: 
-            self.N4 = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
-        
+        usedNumbers: set[int] = {-1}
+        for i in RANGE_OF_INDEXES:
+            num = -1
+            while num in usedNumbers:
+                num = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
+            self.Numbers[i] = num
+            usedNumbers.add(num)
+
         return self
          
     def __str__(self) -> str:
-        return f"({self.N1},{self.N2},{self.N3},{self.N4})"
+        s = "("
+        for i in RANGE_OF_INDEXES:
+            s += f"{self.Numbers[i]},"
+        s += ")"
+        return s
     
-    def contains(self, n: int) -> bool:
-        return n == self.N1 or n == self.N2 or n == self.N3 or n == self.N4
-    
-    def compactString(self) -> str:
-        return f"{self.N1}{self.N2}{self.N3}{self.N4}"
-    
+    def Contains(self, n: int) -> bool:
+        for i in RANGE_OF_INDEXES:
+            if self.Numbers[i] == n: return True
+        return False
+        
     def __eq__(self, other: "Guess") -> bool:
-        return other.N1 == self.N1 and other.N2 == self.N2 and other.N3 == self.N3 and other.N4 == self.N4
+        for i in RANGE_OF_INDEXES:
+            if self.Numbers[i] != other.Numbers[i]: return False
+        return True
+        
 
 class Result:
     Guess: Guess
@@ -65,27 +63,23 @@ class Result:
         return True
     
     def GetTotalCoincidences(self, other: 'Guess') -> int:
-        return int(self.Guess.contains(other.N1)) + \
-               int(self.Guess.contains(other.N2)) + \
-               int(self.Guess.contains(other.N3)) + \
-               int(self.Guess.contains(other.N4))
+        res = 0
+        for i in RANGE_OF_INDEXES:
+            res += 1 if self.Guess.Contains(other.Numbers[i]) else 0
+        return res
     
     def GetCorrectNums(self, other: 'Guess') -> int:
-        return int(self.Guess.N1 == other.N1) + \
-               int(self.Guess.N2 == other.N2) + \
-               int(self.Guess.N3 == other.N3) + \
-               int(self.Guess.N4 == other.N4)
+        res = 0
+        for i in RANGE_OF_INDEXES:
+            res += 1 if self.Guess.Numbers[i] == other.Numbers[i] else 0
+        return res
+
 
 def GetPossibleCombinations() -> list[Guess]:    
     nums: list[Guess] = []
+    for perm in permutations(range(RANGE_OF_VALUES_PER_DIGIT), LENGTH_OF_NUMBERS):
+        nums.append(Guess.FromIterable(perm))
     
-    for x in range(0, RANGE_OF_VALUES_PER_DIGIT):
-        for y in range(0, RANGE_OF_VALUES_PER_DIGIT):
-            for z in range(0, RANGE_OF_VALUES_PER_DIGIT):
-                for w in range(0, RANGE_OF_VALUES_PER_DIGIT):
-                    if (x == y or x == z or x == w or y == z or y == w or z == w): continue
-                    num = Guess.FromInt(x, y, z, w)                                        
-                    nums.append(num)
     return nums
 
 def RemoveFromCombinations(OldCombis: list[Guess], LastResult: Result) -> list[Guess]:
@@ -111,17 +105,19 @@ def PlayRound(MY_GUESS: Guess, NUM_TO_GUESS: Guess) -> Result:
     res.TotalCoincidences = res.GetTotalCoincidences(NUM_TO_GUESS)
     return res
 
+POSSIBLE_VALUES: list[Guess] = []
+
 def solve():    
     NUM_TO_GUESS = Guess.FromRandomGen()
     GameHistory: list[Result] = []
-    PossibleGuesses: list[Guess] = GetPossibleCombinations()
+    PossibleGuesses: list[Guess] = POSSIBLE_VALUES.copy()
     CurrentGuess = GetNextGuess(PossibleGuesses, GameHistory) # Initial Guess
 
     while(True):
         result = PlayRound(CurrentGuess, NUM_TO_GUESS)
         GameHistory.append(result)
         
-        if result.CorrectNums == 4:
+        if result.CorrectNums == LENGTH_OF_NUMBERS:
             if not(CurrentGuess.__eq__(NUM_TO_GUESS)): 
                 raise Exception("FUUUUUUUUUUUUUUUUUUUUUUUUUUUCK")
             
@@ -158,18 +154,25 @@ def progressbar(it, prefix="", size=60):
     
     total_time = time.time() - start    
 
-total = 0
+
 
 STARTTIME = time.time()
+POSSIBLE_VALUES = GetPossibleCombinations()
+PGSBAR_DIVIDER_FACTOR = max(int(REPS / 1000), 1)
+total = 0
+done = 0
 
-print(f"Rounds: {REPS}")
+print(f"Planned rounds: {REPS} (Hit CTRL+C to abort at any point)")
 
-divider = max(int(REPS / 1000), 1)
-
-for i in progressbar(range(REPS // divider)):
-    for j in range(divider):
-        total += solve()
+try:
+    for i in progressbar(range(REPS // PGSBAR_DIVIDER_FACTOR)):
+        for j in range(PGSBAR_DIVIDER_FACTOR):
+            total += solve()
+            done += 1
+except KeyboardInterrupt:
+    print("Aborted")
+    
 
 ENDTIME = time.time()
 
-print(f"AVG of {REPS} rounds: {total/REPS} attempts per game (took {int((ENDTIME - STARTTIME)*100)/100} seconds)")
+print(f"AVG of {done} rounds: {total/done} attempts per game (took {int((ENDTIME - STARTTIME)*100)/100} seconds)")
