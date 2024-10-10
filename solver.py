@@ -1,6 +1,6 @@
 import random, time
 
-NUM_OF_DIGITS = 10   
+RANGE_OF_VALUES_PER_DIGIT = 10
 REPS = 500             # Around 500 with pypy, around 200 with regular python
 PRINT_EACH_RESULT = False
 
@@ -31,14 +31,14 @@ class Guess:
     
     def FromRandomGen():
         self = Guess()
-        self.N1 = self.N2 = self.N3 = self.N4 = random.randint(0, NUM_OF_DIGITS-1)
+        self.N1 = self.N2 = self.N3 = self.N4 = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
         
         while self.N1 == self.N2:
-            self.N2 = random.randint(0, NUM_OF_DIGITS-1)
+            self.N2 = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
         while self.N1 == self.N3 or self.N2 == self.N3: 
-            self.N3 = random.randint(0, NUM_OF_DIGITS-1)
+            self.N3 = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
         while self.N1 == self.N4 or self.N2 == self.N4 or self.N3 == self.N4: 
-            self.N4 = random.randint(0, NUM_OF_DIGITS-1)
+            self.N4 = random.randint(0, RANGE_OF_VALUES_PER_DIGIT-1)
         
         return self
          
@@ -78,10 +78,11 @@ class Result:
 
 def GetPossibleCombinations() -> list[Guess]:    
     nums: list[Guess] = []
-    for x in range(0, NUM_OF_DIGITS):
-        for y in range(0, NUM_OF_DIGITS):
-            for z in range(0, NUM_OF_DIGITS):
-                for w in range(0, NUM_OF_DIGITS):
+    
+    for x in range(0, RANGE_OF_VALUES_PER_DIGIT):
+        for y in range(0, RANGE_OF_VALUES_PER_DIGIT):
+            for z in range(0, RANGE_OF_VALUES_PER_DIGIT):
+                for w in range(0, RANGE_OF_VALUES_PER_DIGIT):
                     if (x == y or x == z or x == w or y == z or y == w or z == w): continue
                     num = Guess.FromInt(x, y, z, w)                                        
                     nums.append(num)
