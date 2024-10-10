@@ -162,6 +162,8 @@ PGSBAR_DIVIDER_FACTOR = max(int(REPS / 1000), 1)
 total = 0
 done = 0
 
+print()
+print()
 print(f"Planned rounds: {REPS} (Hit CTRL+C to abort at any point)")
 
 try:
@@ -172,7 +174,6 @@ try:
 except KeyboardInterrupt:
     print("Aborted")
     
-
 ENDTIME = time.time()
 
 print(f"AVG of {done} rounds: {total/done} attempts per game (took {int((ENDTIME - STARTTIME)*100)/100} seconds)")
