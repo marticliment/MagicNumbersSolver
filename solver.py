@@ -90,7 +90,6 @@ def GetPossibleCombinations() -> list[Guess]:
 def RemoveFromCombinations(OldCombis: list[Guess], LastResult: Result) -> list[Guess]:
     NewCombis: list[Guess] = []
     for num in OldCombis:
-        if LastResult.IsCompatible(num): 
         if LastResult.IsCompatible(num):
             NewCombis.append(num)
             
