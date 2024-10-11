@@ -93,7 +93,11 @@ def RemoveFromCombinations(OldCombis: list[Guess], LastResult: Result) -> list[G
 def GetNextGuess(PossibleGuesses: list[Guess], GameHistory: list[Result]) -> Guess:
     # if len(GameHistory) == 0: return Guess.FromInt(1, 2, 3, 4)
     # else if len(GameHistory) == 1: return Guess.FromInt(8, 5, 6, 7)
-    # return PossibleGuesses[0] 
+    # if enable_random:
+        return PossibleGuesses[(len(PossibleGuesses)//3)*2]
+    #    return PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)]
+    
+    # return PossibleGuesses[len(PossibleGuesses)//4]
     # Gettint the first element instead of a random one
     # increases average from 5.4707 to 5.5623 (tested on 1 million samples)
     return PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)]
