@@ -3,8 +3,9 @@ from itertools import permutations
 
 RANGE_OF_VALUES_PER_DIGIT = 10
 LENGTH_OF_NUMBERS = 4
-REPS = 10000             # Around 500 with pypy, around 200 with regular python
+REPS = 1000             # Around 500 with pypy, around 200 with regular python
 PRINT_EACH_RESULT = False
+ENABLE_COMPARSION_BETWEEN_METHODS = True # Compare two different guess selector algorithms against each other
 
 RANGE_OF_INDEXES = list(range(LENGTH_OF_NUMBERS))
 
@@ -90,18 +91,16 @@ def RemoveFromCombinations(OldCombis: list[Guess], LastResult: Result) -> list[G
             
     return NewCombis
         
-def GetNextGuess(PossibleGuesses: list[Guess], GameHistory: list[Result]) -> Guess:
-    # if len(GameHistory) == 0: return Guess.FromInt(1, 2, 3, 4)
-    # else if len(GameHistory) == 1: return Guess.FromInt(8, 5, 6, 7)
-    # if enable_random:
-        return PossibleGuesses[(len(PossibleGuesses)//3)*2]
-    #    return PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)]
+def GetNextGuess(PossibleGuesses: list[Guess], GameHistory: list[Result], enable_alternative_method: bool) -> Guess:
+    # BEGIN METHOD 1
+    if not enable_alternative_method:
+        return PossibleGuesses[(len(PossibleGuesses)//3)]
+    # END METHOD 1
+    else:
+    # BEGIN METHOD 2
+        return PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)]
+    # END METHOD 2
     
-    # return PossibleGuesses[len(PossibleGuesses)//4]
-    # Gettint the first element instead of a random one
-    # increases average from 5.4707 to 5.5623 (tested on 1 million samples)
-    return PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)]
-
 def PlayRound(MY_GUESS: Guess, NUM_TO_GUESS: Guess) -> Result:
     res = Result()
     res.Guess = MY_GUESS
@@ -115,7 +114,9 @@ def solve():
     NUM_TO_GUESS = Guess.FromRandomGen()
     GameHistory: list[Result] = []
     PossibleGuesses: list[Guess] = POSSIBLE_VALUES.copy()
-    CurrentGuess = GetNextGuess(PossibleGuesses, GameHistory) # Initial Guess
+    FIRST_GUESS = GetNextGuess(PossibleGuesses, GameHistory, False) # Initial Guess
+    CurrentGuess = FIRST_GUESS
+    res_method_1 = -1
 
     while(True):
         result = PlayRound(CurrentGuess, NUM_TO_GUESS)
@@ -127,10 +128,33 @@ def solve():
             
             if PRINT_EACH_RESULT: 
                 print(" Solution:", CurrentGuess, f"(original was {NUM_TO_GUESS})", f"(done in {len(GameHistory)} steps)")
-            return len(GameHistory)
+            res_method_1 = len(GameHistory)
+            break
               
         PossibleGuesses = RemoveFromCombinations(PossibleGuesses, result)
-        CurrentGuess = GetNextGuess(PossibleGuesses, GameHistory)
+        CurrentGuess = GetNextGuess(PossibleGuesses, GameHistory, False)
+
+    GameHistory: list[Result] = []
+    PossibleGuesses: list[Guess] = POSSIBLE_VALUES.copy()
+    CurrentGuess = FIRST_GUESS
+
+    if not ENABLE_COMPARSION_BETWEEN_METHODS:
+        return (res_method_1, 0)
+
+    while(True):
+        result = PlayRound(CurrentGuess, NUM_TO_GUESS)
+        GameHistory.append(result)
+        
+        if result.CorrectNums == LENGTH_OF_NUMBERS:
+            if not(CurrentGuess.__eq__(NUM_TO_GUESS)): 
+                raise Exception("FUUUUUUUUUUUUUUUUUUUUUUUUUUUCK")
+            
+            if PRINT_EACH_RESULT: 
+                print(" Solution:", CurrentGuess, f"(original was {NUM_TO_GUESS})", f"(done in {len(GameHistory)} steps)")
+            return (res_method_1, len(GameHistory))
+              
+        PossibleGuesses = RemoveFromCombinations(PossibleGuesses, result)
+        CurrentGuess = GetNextGuess(PossibleGuesses, GameHistory, True)
 
 
 def to_time_str(seconds):
@@ -163,7 +187,8 @@ def progressbar(it, prefix="", size=60):
 STARTTIME = time.time()
 POSSIBLE_VALUES = GetPossibleCombinations()
 PGSBAR_DIVIDER_FACTOR = max(int(REPS / 1000), 1)
-total = 0
+method_1_total = 0
+method_2_total = 0
 done = 0
 
 print()
@@ -173,11 +198,14 @@ print(f"Planned rounds: {REPS} (Hit CTRL+C to abort at any point)")
 try:
     for i in progressbar(range(REPS // PGSBAR_DIVIDER_FACTOR)):
         for j in range(PGSBAR_DIVIDER_FACTOR):
-            total += solve()
+            res = solve()
+            method_1_total += res[0]
+            method_2_total += res[1]
             done += 1
 except KeyboardInterrupt:
     print("Aborted")
     
 ENDTIME = time.time()
 
-print(f"AVG of {done} rounds: {total/done} attempts per game (took {int((ENDTIME - STARTTIME)*100)/100} seconds)")
+print(f"[METHOD 1] AVG of {done} rounds: {method_1_total/done} attempts per game (took {int((ENDTIME - STARTTIME)*100)/100} seconds)")
+if ENABLE_COMPARSION_BETWEEN_METHODS: print(f"[METHOD 2] AVG of {done} rounds: {method_2_total/done} attempts per game")
