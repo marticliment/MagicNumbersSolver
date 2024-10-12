@@ -91,15 +91,19 @@ def RemoveFromCombinations(OldCombis: list[Guess], LastResult: Result) -> list[G
             
     return NewCombis
         
+METHOD_1_LABEL = "ELEMENT ON POS size/3"        
+METHOD_2_LABEL = "RANDOM ELEMENT       "
+
 def GetNextGuess(PossibleGuesses: list[Guess], GameHistory: list[Result], enable_alternative_method: bool) -> Guess:
-    # BEGIN METHOD 1
     if not enable_alternative_method:
+        # BEGIN METHOD 1
         return PossibleGuesses[(len(PossibleGuesses)//3)]
-    # END METHOD 1
+        # END METHOD 1
+    
     else:
-    # BEGIN METHOD 2
+        # BEGIN METHOD 2
         return PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)]
-    # END METHOD 2
+        # END METHOD 2
     
 def PlayRound(MY_GUESS: Guess, NUM_TO_GUESS: Guess) -> Result:
     res = Result()
@@ -114,7 +118,7 @@ def solve():
     NUM_TO_GUESS = Guess.FromRandomGen()
     GameHistory: list[Result] = []
     PossibleGuesses: list[Guess] = POSSIBLE_VALUES.copy()
-    FIRST_GUESS = GetNextGuess(PossibleGuesses, GameHistory, False) # Initial Guess
+    FIRST_GUESS = PossibleGuesses[random.randint(0, len(PossibleGuesses)-1)] # Initial Guess
     CurrentGuess = FIRST_GUESS
     res_method_1 = -1
 
@@ -207,5 +211,6 @@ except KeyboardInterrupt:
     
 ENDTIME = time.time()
 
-print(f"[METHOD 1] AVG of {done} rounds: {method_1_total/done} attempts per game (took {int((ENDTIME - STARTTIME)*100)/100} seconds)")
-if ENABLE_COMPARSION_BETWEEN_METHODS: print(f"[METHOD 2] AVG of {done} rounds: {method_2_total/done} attempts per game")
+print(f"[{METHOD_1_LABEL}] AVG of {done} rounds: {method_1_total/done} attempts per game (took {int((ENDTIME - STARTTIME)*100)/100} seconds)")
+if ENABLE_COMPARSION_BETWEEN_METHODS: 
+    print(f"[{METHOD_2_LABEL}] AVG of {done} rounds: {method_2_total/done} attempts per game")
